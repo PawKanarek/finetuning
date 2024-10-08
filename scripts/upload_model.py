@@ -116,7 +116,7 @@ async def main(config: bt.config):
         config.competition_id,
         wallet,
         metadata_store=chain_metadata_store,
-        update_repo_visibility=config.update_repo_visibility,
+        update_repo_visibility=True,
     )
 
 
