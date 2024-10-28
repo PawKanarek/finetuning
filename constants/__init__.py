@@ -26,7 +26,7 @@ from competitions.data import CompetitionId
 # Project Constants.
 # ---------------------------------
 
-__version__ = "2.1.2"
+__version__ = "2.2.1"
 version_split = __version__.split(".")
 __spec_version__ = (
     (1000 * int(version_split[0]))
@@ -50,6 +50,8 @@ PROMPTING_SUBNET_UID = 1
 # The Prompting validator WANDB project and filters
 PROMPTING_WANDB_PROJECT = "macrocosmos/prompting-validators"
 PROMPTING_MAX_AGE = dt.timedelta(hours=4)
+# Minimum number of samples allowed to consider MMLU as an eval task.
+MIN_ALLOWED_SAMPLES = 50
 # Percentage of promping miners who must have gotten the question correct to include in the eval set.
 PROMPTING_MIN_CORRECT_MINERS = 0
 # Minimum stake to consider a validator when checking for miners with weights.
@@ -89,6 +91,9 @@ MODEL_CONSTRAINTS_BY_COMPETITION_ID: Dict[CompetitionId, ModelConstraints] = {
         max_bytes=15 * 1024 * 1024 * 1024,
     ),
 }
+
+# Block at which word sorting is including in the competition eval.
+WORD_SORTING_BLOCK = 4139465
 
 # Schedule of competitions by block.
 COMPETITION_SCHEDULE_BY_BLOCK: List[Tuple[int, List[Competition]]] = [
