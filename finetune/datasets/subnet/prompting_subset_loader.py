@@ -273,6 +273,7 @@ class PromptingSubsetLoader:
                     torch.stack([torch.tensor(ids)]),
                     PROMPTING_SUBNET_CHOICES,
                     reference,
+                    challenge,
                 )
             )
         return batches

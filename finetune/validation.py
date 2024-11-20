@@ -133,6 +133,9 @@ class ScoreDetails:
     weighted_norm_score: typing.Optional[float] = None
 
 
+from fain.utils import Tit
+tit = Tit()
+
 def score_model(
     model,
     tokenizer: transformers.PreTrainedTokenizer,
@@ -163,6 +166,7 @@ def score_model(
 
         score = 0
         score_details = {task.name: ScoreDetails() for task in evals}
+        tit.measure(f"evals: {evals}")
 
         for task, samples in zip(evals, samples):
             bt.logging.trace(f"Scoring model on task: {task.name}")
@@ -183,12 +187,14 @@ def score_model(
                         batches=samples,
                         device=device,
                     )
+                    tit.measure(f"raw_score of multiple_choice: {raw_score}")
                 case EvalMethodId.REFERENCE_LOSS:
                     raw_score = compute_reference_loss(
                         model=model,
                         batches=samples,
                         device=device,
                     )
+                    tit.measure(f"raw_score of reference_loss: {raw_score}")
                 case EvalMethodId.TEXT_LOSS:
                     raw_score = compute_text_loss(
                         model=model,
@@ -196,6 +202,7 @@ def score_model(
                         device=device,
                         pad_token_id=tokenizer.eos_token_id,
                     )
+                    tit.measure(f"raw_score of text_loss: {raw_score}")
                 case EvalMethodId.IF_EVAL:
                     compute_if_generation_config = GenerationConfig(
                         max_new_tokens=200,
@@ -212,6 +219,7 @@ def score_model(
                         batches=samples,
                         device=device,
                     )
+                    tit.measure(f"raw_score of if_eval: {raw_score}")
                 case _:
                     raise ValueError(f"Unhandled evaluation method {task.method_id}.")
             # Normalize score
