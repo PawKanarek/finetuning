@@ -105,6 +105,8 @@ class WordSortingLoader:
                 (
                     torch.tensor(ids),
                     torch.tensor(ref_ids),
+                    challenge,
+                    reference,
                 )
             )
         return batches

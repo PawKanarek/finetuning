@@ -32,3 +32,6 @@ class IFEvalTokenizedSample:
 
     # List of rules.
     rules: List[IFEvalRule]
+
+    # reference sample 
+    sample: IFEvalSample

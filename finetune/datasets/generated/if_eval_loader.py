@@ -100,6 +100,7 @@ class IFEvalLoader:
 
             batches.append(
                 IFEvalTokenizedSample(
+                    sample=sample,
                     prompt_1=_tokenize_prompt(sample.prompt_1),
                     prompt_2=_tokenize_prompt(sample.prompt_2),
                     rules=sample.rules,

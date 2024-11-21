@@ -169,7 +169,7 @@ def compute_reference_loss(
     """
     losses = []
     with torch.no_grad():
-        for context, ref in batches:
+        for context, ref, challenge, reference in batches:
             try:
                 # Context and ref are 1 dimensional tensors.
                 inputs = torch.stack([torch.cat([context, ref])]).to(device)
