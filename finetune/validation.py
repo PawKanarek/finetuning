@@ -157,6 +157,9 @@ def score_model(
     Returns:
         tuple: A tuple containing the score and a dictionary of score details."""
 
+    if len(evals) != len(samples):
+        raise ValueError("Number of eval tasks and samples must match.")
+
     with torch.inference_mode():
         model.to(device)
         model.eval()
