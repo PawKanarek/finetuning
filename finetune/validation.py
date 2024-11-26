@@ -131,10 +131,10 @@ class ScoreDetails:
     raw_score: typing.Optional[float] = None
     norm_score: typing.Optional[float] = None
     weighted_norm_score: typing.Optional[float] = None
+    duration: typing.Optional[int] = None
 
 
-from fain.utils import Tit
-tit = Tit()
+import time
 
 def score_model(
     model,
@@ -157,19 +157,16 @@ def score_model(
     Returns:
         tuple: A tuple containing the score and a dictionary of score details."""
 
-    if len(evals) != len(samples):
-        raise ValueError("Number of eval tasks and samples must match.")
-
     with torch.inference_mode():
         model.to(device)
         model.eval()
 
         score = 0
         score_details = {task.name: ScoreDetails() for task in evals}
-        tit.measure(f"evals: {evals}")
 
         for task, samples in zip(evals, samples):
             bt.logging.trace(f"Scoring model on task: {task.name}")
+            start_time = time.monotonic_ns()
             match task.method_id:
                 case EvalMethodId.MULTIPLE_CHOICE:
                     compute_mc_generation_config = GenerationConfig(
@@ -187,14 +184,12 @@ def score_model(
                         batches=samples,
                         device=device,
                     )
-                    tit.measure(f"raw_score of multiple_choice: {raw_score}")
                 case EvalMethodId.REFERENCE_LOSS:
                     raw_score = compute_reference_loss(
                         model=model,
                         batches=samples,
                         device=device,
                     )
-                    tit.measure(f"raw_score of reference_loss: {raw_score}")
                 case EvalMethodId.TEXT_LOSS:
                     raw_score = compute_text_loss(
                         model=model,
@@ -202,7 +197,6 @@ def score_model(
                         device=device,
                         pad_token_id=tokenizer.eos_token_id,
                     )
-                    tit.measure(f"raw_score of text_loss: {raw_score}")
                 case EvalMethodId.IF_EVAL:
                     compute_if_generation_config = GenerationConfig(
                         max_new_tokens=200,
@@ -219,7 +213,6 @@ def score_model(
                         batches=samples,
                         device=device,
                     )
-                    tit.measure(f"raw_score of if_eval: {raw_score}")
                 case _:
                     raise ValueError(f"Unhandled evaluation method {task.method_id}.")
             # Normalize score
@@ -227,12 +220,13 @@ def score_model(
                 raw_score, task.normalization_id, task.normalization_kwargs
             )
             weighted_norm_score = normalized_score * task.weight
-
+            duration = time.monotonic_ns() - start_time
             score += weighted_norm_score
             score_details[task.name] = ScoreDetails(
                 raw_score=raw_score,
                 norm_score=normalized_score,
                 weighted_norm_score=weighted_norm_score,
+                duration=duration,
             )
 
     return score, score_details

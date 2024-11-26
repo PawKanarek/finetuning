@@ -30,7 +30,7 @@ class DatasetLoader:
                 return WordSortingLoader(random_seed=seed, **dataset_kwargs)
             case DatasetId.FINEWEB:
                 return HuggingFaceLoader(
-                    name=FINEWEB_EDU_SCORE_2_NAME, random_seed=seed
+                    name=FINEWEB_EDU_SCORE_2_NAME, random_seed=seed, **dataset_kwargs
                 )
             case DatasetId.SYNTHETIC_IF_EVAL:
                 return IFEvalLoader(

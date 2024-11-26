@@ -169,7 +169,7 @@ def compute_reference_loss(
     """
     losses = []
     with torch.no_grad():
-        for context, ref, challenge, reference in batches:
+        for context, ref in batches:
             try:
                 # Context and ref are 1 dimensional tensors.
                 inputs = torch.stack([torch.cat([context, ref])]).to(device)
@@ -197,9 +197,6 @@ def compute_reference_loss(
                 return math.inf
     return sum(losses) / len(losses) if losses else math.inf
 
-from fain.utils import Tit
-tit = Tit()
-
 def compute_multiple_choice_deviation(
     model,
     tokenizer: transformers.PreTrainedTokenizer,
@@ -222,15 +219,14 @@ def compute_multiple_choice_deviation(
     """
     # Iterate over each page and corresponding batches
     multiple_choice_deviations = []
-    show_warning = True
     wierd_outputs = []
 
-    for i, (
+    for ( # type: ignore
         inputs,
         choices,
         answer,
         challenge,
-    ) in enumerate(batches):
+    ) in batches:
         try:
             response = generate_output(
                 model=model,
@@ -244,10 +240,7 @@ def compute_multiple_choice_deviation(
                 word for word in re.sub(r"\W", " ", response).split() if word in choices
             ] 
             if len(matches) > 1:
-                # tit.measure(f"matches: {matches}")
-                # tit.measure(f"response: {response}")
-                # tit.measure(f"question: {tokenizer.decode(inputs[0], skip_special_tokens=False)}")
-                wierd_outputs.append((i, inputs, choices, answer, challenge, response))
+                wierd_outputs.append((inputs, choices, challenge, response))
 
             # Give credit if the first matched word in the response is correct.
             if matches and matches[0] == answer:
@@ -262,12 +255,13 @@ def compute_multiple_choice_deviation(
             multiple_choice_deviations.append(1)  # Use 1 to indicate failure
     
     if len(wierd_outputs) > 0:
-        tit.measure(f"model generated {len(wierd_outputs)} wierd outputs. Showing first:")
-        for i, inputs, choices, answer, challenge, response in wierd_outputs[:1]:
+        print("-"*100)
+        print(f"model generated {len(wierd_outputs)} wierd outputs. Showing first:")
+        for inputs, choices, challenge, response in wierd_outputs[:1]:
             question = tokenizer.decode(inputs[0], skip_special_tokens=False)
-            tit.measure(f"Question {i}: {question}")
-            tit.measure(f"Response {i}: {response}")
-            tit.measure(f"Matches {i}: {matches}")
+            print(f"Question: {question}")
+            print(f"Response: {response}")
+            print(f"Matches: {matches}")
 
     # For multiple choice, return a single deviation, which is the ratio of incorrect answers.
     return (
@@ -364,9 +358,6 @@ def generate_output(
         input_ids=input_ids,
         generation_config=generation_config,
     )
-    # tit.measure(f"Output: {output}")
-    # whole_decoded = tokenizer.decode(output[0], skip_special_tokens=False)
-    # tit.measure("whole_decoded:", whole_decoded)
     response = tokenizer.decode(
         output[0][len(input_ids[0]) :], skip_special_tokens=True
     )

@@ -137,7 +137,6 @@ COMPETITION_SCHEDULE_BY_BLOCK: List[Tuple[int, List[Competition]]] = [
                         normalization_kwargs={"ceiling": 40.0},
                         weight=0.05,
                     ),
-                    
                     EvalTask(
                         name="FINEWEB",
                         method_id=EvalMethodId.TEXT_LOSS,

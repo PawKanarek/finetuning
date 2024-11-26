@@ -65,6 +65,10 @@ class PromptingSubsetLoader:
                     }
                 }
             )
+            
+        print("-"*100)
+        print(f"filters_and: {filters_and}") 
+        print("-"*100)
         if validator_hotkeys:
             # 'IN' is not supported in the query language so we add a series of 'OR'.
             for hotkey in validator_hotkeys:
