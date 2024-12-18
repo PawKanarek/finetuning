@@ -170,7 +170,7 @@ def score_model(
         tokenizer = model.tokenizer
 
         for task, samples in zip(evals, samples):
-            bt.logging.trace(f"Scoring model on task: {task.name}")
+            logging.trace(f"Scoring model on task: {task.name}")
             start_time = time.monotonic_ns()
             match task.method_id:
                 case EvalMethodId.MULTIPLE_CHOICE:
