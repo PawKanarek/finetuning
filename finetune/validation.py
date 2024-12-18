@@ -21,7 +21,7 @@
 import dataclasses
 import typing
 
-import bittensor as bt
+import taoverse.utilities.logging as logging
 import torch
 from taoverse.model.competition.data import Competition
 from taoverse.model.competition.epsilon import EpsilonFunc
