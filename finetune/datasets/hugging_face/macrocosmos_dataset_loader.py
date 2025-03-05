@@ -63,6 +63,7 @@ class MacrocosmosDatasetLoader(DatasetLoader):
         oldest_sample_timestamp: typing.Optional[dt.datetime] = None,
         newest_sample_timestamp: typing.Optional[dt.datetime] = None,
         validator_hotkeys: typing.Optional[typing.Set[str]] = None,
+        configs_to_sample: int = NUM_CONFIGS_TO_SAMPLE,
     ):
         """Loads prompt/response data from Subnet 1.
 
@@ -87,10 +88,10 @@ class MacrocosmosDatasetLoader(DatasetLoader):
 
         # Sample NUM_CONFIGS_TO_SAMPLE configs randomly
         sampled_configs = []
-        if len(all_configs) <= NUM_CONFIGS_TO_SAMPLE:
+        if len(all_configs) <= configs_to_sample:
             sampled_configs = all_configs
         else:
-            sampled_configs = random.sample(all_configs, NUM_CONFIGS_TO_SAMPLE)
+            sampled_configs = random.sample(all_configs, configs_to_sample)
 
         logging.info(f"Sampled {len(sampled_configs)} configs: {sampled_configs}")
 
