@@ -85,6 +85,7 @@ from websockets.exceptions import InvalidStatus
 import constants
 import finetune as ft
 from competitions.data import CompetitionId
+from finetune.eval.method import EvalMethodId
 from model.retry import should_retry_model
 from neurons import config as neuron_config
 
@@ -1037,12 +1038,16 @@ class Validator:
 
                 if data_loader:
                     eval_tasks.append(eval_task)
+                    logging.info(
+                        f"Loaded {len(data_loader)} samples for task {eval_task.name}"
+                    )
                     data_loaders.append(data_loader)
                     if use_default_tokenizer:
                         assert tokenizer
                         samples.append(
                             data_loader.tokenize(
-                                tokenizer, competition.constraints.sequence_length
+                                tokenizer,
+                                competition.constraints.sequence_length,
                             )
                         )
 
@@ -1101,7 +1106,16 @@ class Validator:
                                 raise ValueError(
                                     f"Model {uid_i} does not have a tokenizer."
                                 )
-
+                                
+                            # Check if tokenizer has a pad token, if not set it to eos_token
+                            if model_i.tokenizer.pad_token is None:
+                                if model_i.tokenizer.eos_token is not None:
+                                    model_i.tokenizer.pad_token = model_i.tokenizer.eos_token
+                                else:
+                                    # Add a new pad token if there's no eos token
+                                    model_i.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+                                logging.debug(f"Added padding token for model {uid_i} tokenizer")
+                                
                             samples = [
                                 loader.tokenize(
                                     model_i.tokenizer,
