@@ -207,6 +207,9 @@ def compute_reference_loss(
                 ref_logits = ref_logits.view(-1, model.config.vocab_size)
                 ref_labels = ref_labels.view(-1)
                 losses.append(loss_fct(ref_logits, ref_labels).item())
+                del logits, shift_logits, shift_labels, ref_logits, ref_labels, inputs
+                torch.cuda.empty_cache()
+                # torch.cuda.synchronize()
             except Exception as e:
                 logging.error(
                     f"Exception occurred in reference loss computation: {traceback.format_exc(e)}"

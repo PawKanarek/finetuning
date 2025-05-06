@@ -168,8 +168,9 @@ def score_model(
         logging.info(f"Renormalizing weights of {len(eval_tasks)} remaining eval tasks. Original sum: {total_weight}")
 
     with torch.inference_mode():
-        model.pt_model.to(device)
-        model.pt_model.eval()
+        # something funky
+        # model.pt_model.to(device)
+        # model.pt_model.eval()
 
         score = 0
         score_details = {task.name: ScoreDetails() for task in eval_tasks}
@@ -178,6 +179,8 @@ def score_model(
         for task, task_samples in zip(eval_tasks, samples):
             logging.trace(f"Scoring model on task: {task.name}")
             start_time = time.monotonic_ns()
+            model.pt_model.to(device)
+            model.pt_model.eval()
             match task.method_id:
                 case EvalMethodId.MULTIPLE_CHOICE:
                     compute_mc_generation_config = GenerationConfig(
@@ -227,6 +230,9 @@ def score_model(
                 case _:
                     raise ValueError(f"Unhandled evaluation method {task.method_id}.")
             # Normalize score
+            model.pt_model.to("cpu")
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
             normalized_score = normalize_score(
                 raw_score, task.normalization_id, task.normalization_kwargs
             )
